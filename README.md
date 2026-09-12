@@ -23,17 +23,34 @@ It is an educational tool and a genuinely fun game, not an LLM wrapper.
 
 ## Quickstart
 
+Copy-paste to clone, install, and start the dev server (Node 20+ recommended):
+
 ```bash
-git clone https://github.com/AgentPostmortem/injection-arena
+git clone https://github.com/AgentPostmortem/injection-arena.git
 cd injection-arena
 npm install
-npm run dev        # http://localhost:3000
+npm run dev
 ```
 
-No configuration needed: the app defaults to the offline mock agent. Run the test suite with:
+No configuration needed: the app defaults to the offline mock agent. When the dev server is ready you should see something like:
+
+```text
+  ▲ Next.js 14.2.15
+  - Local:        http://localhost:3000
+```
+
+Open that URL in your browser and pick a level. Confirm the project with the test suite:
 
 ```bash
 npm test
+```
+
+Expected output (file and test counts may grow as levels are added):
+
+```text
+ Test Files  7 passed (7)
+      Tests  48 passed (48)
+   Duration  ~1s
 ```
 
 ## How levels and defenses work
