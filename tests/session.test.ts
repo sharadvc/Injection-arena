@@ -36,4 +36,21 @@ describe("rate limiter", () => {
     }
     expect(rateLimit(key, 3, 60_000).allowed).toBe(false);
   });
+
+  it("falls back to default limit when RATE_LIMIT_MAX is not a number", () => {
+    _resetRateLimiter();
+    const prev = process.env.RATE_LIMIT_MAX;
+    process.env.RATE_LIMIT_MAX = "abc";
+    try {
+      const key = "rl-invalid-env";
+      for (let i = 0; i < 20; i++) {
+        expect(rateLimit(key).allowed).toBe(true);
+      }
+      expect(rateLimit(key).allowed).toBe(false);
+    } finally {
+      if (prev === undefined) delete process.env.RATE_LIMIT_MAX;
+      else process.env.RATE_LIMIT_MAX = prev;
+      _resetRateLimiter();
+    }
+  });
 });
