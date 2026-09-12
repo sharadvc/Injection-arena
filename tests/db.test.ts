@@ -63,4 +63,21 @@ describe("db + leaderboard", () => {
     expect(board[0].totalPoints).toBe(250);
     expect(board[1].nickname).toBe("alice");
   });
+
+  it("clamps invalid leaderboard limits to the default page size", async () => {
+    for (let i = 0; i < 55; i++) {
+      await recordAttempt({
+        sessionId: `session-${i}`,
+        nickname: `player-${i}`,
+        challengeId: "level-1-open-book",
+        input: "x",
+        cracked: true,
+        reason: "leaked-secret",
+        points: i,
+      });
+    }
+
+    expect((await getLeaderboard(-1)).length).toBe(50);
+    expect((await getLeaderboard(Number.NaN)).length).toBe(50);
+  });
 });

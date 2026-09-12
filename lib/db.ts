@@ -288,8 +288,19 @@ export async function recordAttempt(
   return (await getBackend()).recordAttempt(input);
 }
 
-export async function getLeaderboard(limit = 50): Promise<LeaderboardRow[]> {
-  return (await getBackend()).getLeaderboard(limit);
+const DEFAULT_LEADERBOARD_LIMIT = 50;
+
+function normalizeLeaderboardLimit(limit: number): number {
+  if (!Number.isFinite(limit) || limit < 1) {
+    return DEFAULT_LEADERBOARD_LIMIT;
+  }
+  return Math.floor(limit);
+}
+
+export async function getLeaderboard(
+  limit = DEFAULT_LEADERBOARD_LIMIT,
+): Promise<LeaderboardRow[]> {
+  return (await getBackend()).getLeaderboard(normalizeLeaderboardLimit(limit));
 }
 
 export async function getSessionAttempts(
