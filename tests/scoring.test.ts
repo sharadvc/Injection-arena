@@ -28,4 +28,16 @@ describe("scoring", () => {
     expect(later).toBeLessThan(first);
     expect(floor).toBeGreaterThanOrEqual(Math.round(first * 0.4) - 1);
   });
+
+  it("negative priorAttempts cannot score above first try", () => {
+    const firstTry = scoreCrack(level1, 0);
+    expect(scoreCrack(level1, -1)).toBe(firstTry);
+    expect(scoreCrack(level1, -5)).toBe(firstTry);
+  });
+
+  it("non-finite priorAttempts never yields NaN score", () => {
+    const firstTry = scoreCrack(level1, 0);
+    expect(Number.isNaN(scoreCrack(level1, NaN))).toBe(false);
+    expect(scoreCrack(level1, NaN)).toBe(firstTry);
+  });
 });

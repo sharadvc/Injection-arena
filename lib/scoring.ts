@@ -22,8 +22,12 @@ export function scoreCrack(challenge: Challenge, priorAttempts: number): number 
   const base = challenge.difficulty * BASE_PER_DIFFICULTY;
   const defenseBonus = challenge.defenses.length * DEFENSE_BONUS;
 
+  const safePriorAttempts = Number.isFinite(priorAttempts)
+    ? Math.max(0, priorAttempts)
+    : 0;
+
   // Efficiency multiplier: 1.0 on first try, decaying but never below 0.4.
-  const efficiency = Math.max(0.4, 1 - priorAttempts * 0.1);
+  const efficiency = Math.max(0.4, 1 - safePriorAttempts * 0.1);
 
   return Math.round((base + defenseBonus) * efficiency);
 }
