@@ -13,6 +13,13 @@ describe("judge", () => {
     expect(v.reason).toBe("leaked-secret");
   });
 
+  it("treats a case-variant verbatim leak as cracked", () => {
+    const variant = noDefense.secret.replace(/[a-z]/g, (c) => c.toUpperCase());
+    const v = judge(noDefense, { text: `the value is ${variant}` });
+    expect(v.cracked).toBe(true);
+    expect(v.reason).toBe("leaked-secret");
+  });
+
   it("redacts and does not crack a verbatim leak behind an output filter", () => {
     const v = judge(outputFiltered, {
       text: `here: ${outputFiltered.secret}`,
@@ -21,6 +28,15 @@ describe("judge", () => {
     expect(v.reason).toBe("redacted-output");
     expect(v.output).toContain("[REDACTED]");
     expect(v.output).not.toContain(outputFiltered.secret);
+  });
+
+  it("redacts a case-variant verbatim leak behind an output filter", () => {
+    const variant = outputFiltered.secret.replace(/[a-z]/g, (c) => c.toUpperCase());
+    const v = judge(outputFiltered, { text: `here: ${variant}` });
+    expect(v.cracked).toBe(false);
+    expect(v.reason).toBe("redacted-output");
+    expect(v.output).toContain("[REDACTED]");
+    expect(v.output.toLowerCase()).not.toContain(outputFiltered.secret.toLowerCase());
   });
 
   it("catches a base64-obfuscated secret slipping past the output filter", () => {
