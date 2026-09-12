@@ -19,6 +19,17 @@ import type { Verdict } from "./types";
 // Scoring rule: only the *first* crack of a level by a session earns points;
 // subsequent cracks and all failures earn zero.
 
+export const MAX_ATTEMPT_INPUT = 4000;
+
+export function validateAttemptInput(input: string): void {
+  if (input.trim().length === 0) {
+    throw new Error("input must not be empty or whitespace-only");
+  }
+  if (input.length > MAX_ATTEMPT_INPUT) {
+    throw new Error(`input must be at most ${MAX_ATTEMPT_INPUT} characters`);
+  }
+}
+
 export interface RunAttemptArgs {
   session: Session;
   challengeId: string;
@@ -43,6 +54,8 @@ export async function runAttempt(args: RunAttemptArgs): Promise<AttemptOutcome> 
   if (!challenge) {
     throw new Error(`Unknown challenge: ${args.challengeId}`);
   }
+
+  validateAttemptInput(args.input);
 
   const priorAttempts = args.dryRun
     ? args.priorAttempts ?? 0
