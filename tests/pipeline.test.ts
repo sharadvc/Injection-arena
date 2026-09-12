@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { runAttempt } from "@/lib/arena";
+import * as agentModule from "@/lib/agent";
+import { MAX_ATTEMPT_INPUT, runAttempt } from "@/lib/arena";
 import {
   countAttempts,
   getLeaderboard,
@@ -20,8 +21,50 @@ describe("end-to-end attempt pipeline with persistence", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+  });
+
+  it("rejects whitespace-only input before agent or persistence", async () => {
+    const respond = vi.fn();
+    vi.spyOn(agentModule, "getAgent").mockReturnValue({
+      name: "test",
+      isAvailable: () => true,
+      respond,
+    });
+
+    await expect(
+      runAttempt({
+        session: alice,
+        challengeId: "level-1-open-book",
+        input: "   ",
+      }),
+    ).rejects.toThrow(/input/i);
+
+    expect(respond).not.toHaveBeenCalled();
+    expect(await countAttempts("alice-1", "level-1-open-book")).toBe(0);
+  });
+
+  it("rejects oversized input before agent or persistence", async () => {
+    const respond = vi.fn();
+    vi.spyOn(agentModule, "getAgent").mockReturnValue({
+      name: "test",
+      isAvailable: () => true,
+      respond,
+    });
+
+    const oversized = "x".repeat(MAX_ATTEMPT_INPUT + 1);
+    await expect(
+      runAttempt({
+        session: alice,
+        challengeId: "level-1-open-book",
+        input: oversized,
+      }),
+    ).rejects.toThrow(/input/i);
+
+    expect(respond).not.toHaveBeenCalled();
+    expect(await countAttempts("alice-1", "level-1-open-book")).toBe(0);
   });
 
   it("persists a failed attempt with zero points", async () => {

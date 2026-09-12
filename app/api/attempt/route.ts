@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { runAttempt } from "@/lib/arena";
+import { runAttempt, validateAttemptInput } from "@/lib/arena";
 import { getChallenge } from "@/lib/challenges/levels";
 import { ensureSession } from "@/lib/http";
 import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const MAX_INPUT = 4000;
 
 export async function POST(req: Request) {
   const session = ensureSession();
@@ -31,11 +29,12 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  if (input.length === 0 || input.length > MAX_INPUT) {
-    return NextResponse.json(
-      { error: `input must be 1..${MAX_INPUT} characters` },
-      { status: 400 },
-    );
+  try {
+    validateAttemptInput(input);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "invalid input";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
   if (!getChallenge(challengeId)) {
     return NextResponse.json({ error: "unknown challenge" }, { status: 404 });
